@@ -16,11 +16,21 @@ class APIRoot(APIView):
 
 
 class MoviesList(ListAPIView):
+
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
+    filterset_fields = ["genre", "directors"]
+    search_fields = [
+        "directors__first_name",
+        "directors__last_name",
+        "actors__last_name",
+        "actors__first_name",
+        "title"
+    ]
 
 
 class MovieDetail(RetrieveAPIView):
+
     lookup_field = "slug"
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer

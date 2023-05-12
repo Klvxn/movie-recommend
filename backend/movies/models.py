@@ -1,7 +1,7 @@
 import autoslug
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.shortcuts import reverse
-from django.contrib.auth.models import AbstractUser
 
 
 # Create your models here.
@@ -9,7 +9,11 @@ class Movie(models.Model):
 
     class MovieType(models.TextChoices):
         SERIES = "Series"
-        SHOW = "Single"
+        SINGLE = "Single"
+
+    class DownloadQuality(models.Model):
+        standard = models.URLField()
+        high = models.URLField()
 
     type = models.CharField(max_length=30, choices=MovieType.choices, null=True)
     slug = autoslug.AutoSlugField(
@@ -19,10 +23,21 @@ class Movie(models.Model):
     desc = models.TextField()
     release_date = models.DateField()
     genre = models.CharField(max_length=200)
+    pahe = models.ForeignKey(
+        DownloadQuality,
+        related_name="pahe_link",
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    torrent = models.ForeignKey(
+        DownloadQuality,
+        related_name="torrent_quality",
+        on_delete=models.SET_NULL,
+        null=True
+    )
     duration = models.DurationField()
     cover_photo = models.ImageField(upload_to="cover")
     ratings = models.ForeignKey("Rating", on_delete=models.SET(None))
-    download_links = models.ForeignKey("DownloadLink", on_delete=models.SET_NULL, null=True)
     directors = models.ManyToManyField("Director", related_name="movie_directors")
     actors = models.ManyToManyField("Actor", related_name="movie_actors")
 
@@ -38,12 +53,6 @@ class Rating(models.Model):
     rotten_tomatoes = models.CharField(max_length=10)
     ours = models.CharField(max_length=10)
     imdb = models.CharField(max_length=10)
-
-
-class DownloadLink(models.Model):
-
-    pahe = models.URLField(null=True)
-    torrent = models.URLField(null=True)
 
 
 class Person(models.Model):
@@ -67,6 +76,7 @@ class Director(Person):
 
 class Actor(Person):
     pass
+
 
 class CustomUser(AbstractUser):
     pass
